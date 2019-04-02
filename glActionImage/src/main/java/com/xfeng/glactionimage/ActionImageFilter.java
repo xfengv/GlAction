@@ -109,6 +109,7 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         float sWH = w / (float) h;
         float sWidthHeight = width / (float) height;
         uXY = sWidthHeight;
+        //CENTER_INSIDE
         if (width > height) {
             if (sWH > sWidthHeight) {
                 Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight * sWH, sWidthHeight * sWH, -1, 1, 3, 5);
@@ -122,6 +123,9 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
                 Matrix.orthoM(mProjectMatrix, 0, -1, 1, -sWH / sWidthHeight, sWH / sWidthHeight, 3, 5);
             }
         }
+        //fitXY
+        Matrix.orthoM(mProjectMatrix, 0, -1, 1, -1, 1, 3, 5);
+
         //设置相机位置
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 5.0f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         //计算变换矩阵
