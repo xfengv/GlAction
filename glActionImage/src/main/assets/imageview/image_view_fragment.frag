@@ -1,4 +1,3 @@
-#version 100 es
 precision mediump float;
 
 uniform sampler2D vTexture;

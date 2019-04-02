@@ -2,6 +2,7 @@ package com.xfeng.glactionimage;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 
@@ -28,6 +29,9 @@ public class glActionImageView extends GLSurfaceView {
     private void init() {
         // 设置OpenGL版本(一定要设置)
         setEGLContextClientVersion(2);
+        setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+        getHolder().setFormat(PixelFormat.TRANSLUCENT);
+        setZOrderOnTop(true);
         mGlActionRender = new glActionRender(this);
         // 设置渲染器
         setRenderer(mGlActionRender);

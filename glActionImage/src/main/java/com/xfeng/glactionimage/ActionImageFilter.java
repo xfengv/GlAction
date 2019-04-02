@@ -96,7 +96,7 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         //其他的一些Uniform数据
         onDrawCreatedSet(mProgram);
         // 设置clear color颜色RGBA(这里仅仅是设置清屏时GLES20.glClear()用的颜色值而不是执行清屏)
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        gl.glClearColor(0,0,0,0);
     }
 
 
@@ -104,7 +104,6 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
-
         int w = mBitmap.getWidth();
         int h = mBitmap.getHeight();
         float sWH = w / (float) h;
