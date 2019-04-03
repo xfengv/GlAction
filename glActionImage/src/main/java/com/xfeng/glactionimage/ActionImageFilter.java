@@ -57,6 +57,7 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
     public static final int SCALE_TYPE_CENTER_INSIDE = 1003;
     private static int mCurrentScaleType = SCALE_TYPE_CENTER_CROP;
 
+
     public ActionImageFilter(Context context, String vertex, String fragment) {
         this.mContext = context;
         this.mVertex = vertex;
@@ -100,6 +101,8 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         mGlHCoordinate = GLES20.glGetAttribLocation(mProgram, "vCoordinate");
         mGlHTexture = GLES20.glGetUniformLocation(mProgram, "vTexture");
         mGlHMatrix = GLES20.glGetUniformLocation(mProgram, "vMatrix");
+
+
 
         //其他的一些Uniform数据
         onDrawCreatedSet(mProgram);

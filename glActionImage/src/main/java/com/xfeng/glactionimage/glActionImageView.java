@@ -40,7 +40,7 @@ public class glActionImageView extends GLSurfaceView {
         setRenderMode(RENDERMODE_WHEN_DIRTY);
         mGlActionRender.setScaleType(ActionImageFilter.SCALE_TYPE_FIT_XY);
         try {
-            mGlActionRender.setImage(BitmapFactory.decodeStream(getResources().getAssets().open("texture/fengj.png")));
+            mGlActionRender.setImage(BitmapFactory.decodeStream(getResources().getAssets().open("texture/timg.jpeg")));
             requestLayout();
         } catch (IOException e) {
             e.printStackTrace();

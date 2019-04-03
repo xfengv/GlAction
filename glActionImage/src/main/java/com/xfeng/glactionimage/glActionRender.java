@@ -22,7 +22,7 @@ public class glActionRender implements GLSurfaceView.Renderer{
 
 
     public glActionRender(View mView) {
-        mActionImageFilter = new ActionImageColorFiter(mView.getContext(), ActionImageColorFiter.Filter.NONE);
+        mActionImageFilter = new ActionImageColorFiter(mView.getContext(), ActionImageColorFiter.Filter.BLUR);
     }
 
     public void setImage(Bitmap bitmap){

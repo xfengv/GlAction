@@ -13,6 +13,9 @@ public class ActionImageColorFiter extends ActionImageFilter {
     private  Filter mFilter;
     private int hChangeType;
     private int hChangeColor;
+    private int mTexelWidthOffset;
+    private int mTexelHeightOffset;
+    private int mVertexType;
 
     public ActionImageColorFiter(Context context, Filter filter) {
         super(context, "imageview/image_view_vertex.vert", "imageview/image_view_fragment.frag");
@@ -22,13 +25,19 @@ public class ActionImageColorFiter extends ActionImageFilter {
     @Override
     public void onDrawSet() {
         GLES20.glUniform1i(hChangeType,mFilter.getType());
+        GLES20.glUniform1i(mVertexType,mFilter.getType());
         GLES20.glUniform3fv(hChangeColor,1,mFilter.data(),0);
+        GLES20.glUniform1f(mTexelWidthOffset, 1/300f);
+        GLES20.glUniform1f(mTexelHeightOffset, 1f/300f);
     }
 
     @Override
     public void onDrawCreatedSet(int program) {
         hChangeType=GLES20.glGetUniformLocation(program,"vChangeType");
         hChangeColor=GLES20.glGetUniformLocation(program,"vChangeColor");
+        mTexelWidthOffset = GLES20.glGetUniformLocation(program, "texelWidthOffset");
+        mTexelHeightOffset = GLES20.glGetUniformLocation(program, "texelHeightOffset");
+        mVertexType = GLES20.glGetUniformLocation(program, "vertexType");
     }
 
     public enum Filter{

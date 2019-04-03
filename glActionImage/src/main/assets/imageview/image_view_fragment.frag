@@ -1,5 +1,4 @@
 precision mediump float;
-
 uniform sampler2D vTexture;
 uniform int vChangeType;
 uniform vec3 vChangeColor;
@@ -7,6 +6,9 @@ uniform float uXY;
 
 varying vec4 gPosition;
 varying vec2 aCoordinate;
+
+const lowp int GAUSSIAN_SAMPLES = 9;
+varying highp vec2 blurCoordinates[GAUSSIAN_SAMPLES];
 
 void modifyColor(vec4 color){
     color.r=max(min(color.r, 1.0), 0.0);
@@ -27,21 +29,21 @@ void main(){
         modifyColor(deltaColor);
         gl_FragColor=deltaColor;
     } else if (vChangeType==3){
-        //高斯模糊
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x-vChangeColor.r, aCoordinate.y-vChangeColor.r));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x-vChangeColor.r, aCoordinate.y+vChangeColor.r));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x+vChangeColor.r, aCoordinate.y-vChangeColor.r));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x+vChangeColor.r, aCoordinate.y+vChangeColor.r));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x-vChangeColor.g, aCoordinate.y-vChangeColor.g));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x-vChangeColor.g, aCoordinate.y+vChangeColor.g));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x+vChangeColor.g, aCoordinate.y-vChangeColor.g));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x+vChangeColor.g, aCoordinate.y+vChangeColor.g));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x-vChangeColor.b, aCoordinate.y-vChangeColor.b));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x-vChangeColor.b, aCoordinate.y+vChangeColor.b));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x+vChangeColor.b, aCoordinate.y-vChangeColor.b));
-        nColor+=texture2D(vTexture, vec2(aCoordinate.x+vChangeColor.b, aCoordinate.y+vChangeColor.b));
-        nColor/=13.0;
-        gl_FragColor=nColor;
+        lowp vec3 sum = vec3(0.0);
+        lowp vec4 fragColor=texture2D(vTexture,aCoordinate);
+
+        sum += texture2D(vTexture, blurCoordinates[0]).rgb * 0.05;
+        sum += texture2D(vTexture, blurCoordinates[1]).rgb * 0.09;
+        sum += texture2D(vTexture, blurCoordinates[2]).rgb * 0.12;
+        sum += texture2D(vTexture, blurCoordinates[3]).rgb * 0.15;
+        sum += texture2D(vTexture, blurCoordinates[4]).rgb * 0.18;
+        sum += texture2D(vTexture, blurCoordinates[5]).rgb * 0.15;
+        sum += texture2D(vTexture, blurCoordinates[6]).rgb * 0.12;
+        sum += texture2D(vTexture, blurCoordinates[7]).rgb * 0.09;
+        sum += texture2D(vTexture, blurCoordinates[8]).rgb * 0.05;
+
+        gl_FragColor = vec4(sum, fragColor.a);
+
     } else if (vChangeType==4){
         float dis=distance(vec2(gPosition.x, gPosition.y/uXY), vec2(vChangeColor.r, vChangeColor.g));
         if (dis<vChangeColor.b){
