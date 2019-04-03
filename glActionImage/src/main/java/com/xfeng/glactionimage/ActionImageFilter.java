@@ -23,23 +23,23 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
     private final float[] vertices = {
-            -1.0f,1.0f,
-            -1.0f,-1.0f,
-            1.0f,1.0f,
-            1.0f,-1.0f
+            -1.0f, 1.0f,
+            -1.0f, -1.0f,
+            1.0f, 1.0f,
+            1.0f, -1.0f
     };
 
     private final float[] coordinates = {
-            0.0f,0.0f,
-            0.0f,1.0f,
-            1.0f,0.0f,
-            1.0f,1.0f,
+            0.0f, 0.0f,
+            0.0f, 1.0f,
+            1.0f, 0.0f,
+            1.0f, 1.0f,
     };
-    private  Context mContext;
-    private  String mVertex;
-    private  String mFragment;
-    private  FloatBuffer mVerticesfloatBuffer;
-    private  FloatBuffer mFragfloatBuffer;
+    private Context mContext;
+    private String mVertex;
+    private String mFragment;
+    private FloatBuffer mVerticesfloatBuffer;
+    private FloatBuffer mFragfloatBuffer;
     private Bitmap mBitmap;
     //都是4x4矩阵
     private float[] mViewMatrix = new float[16];
@@ -52,8 +52,12 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
     private int mGlHMatrix;
     private int mGlHUxy;
     private float uXY;
+    public static final int SCALE_TYPE_FIT_XY = 1001;
+    public static final int SCALE_TYPE_CENTER_CROP = 1002;
+    public static final int SCALE_TYPE_CENTER_INSIDE = 1003;
+    private static int mCurrentScaleType = SCALE_TYPE_CENTER_CROP;
 
-    public ActionImageFilter(Context context,String vertex,String fragment){
+    public ActionImageFilter(Context context, String vertex, String fragment) {
         this.mContext = context;
         this.mVertex = vertex;
         this.mFragment = fragment;
@@ -80,6 +84,10 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         this.mBitmap = bitmap;
     }
 
+    public void setScaleType(int scaleType) {
+        this.mCurrentScaleType = scaleType;
+    }
+
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
@@ -96,9 +104,8 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         //其他的一些Uniform数据
         onDrawCreatedSet(mProgram);
         // 设置clear color颜色RGBA(这里仅仅是设置清屏时GLES20.glClear()用的颜色值而不是执行清屏)
-        gl.glClearColor(0,0,0,0);
+        gl.glClearColor(0, 0, 0, 0);
     }
-
 
 
     @Override
@@ -109,23 +116,42 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         float sWH = w / (float) h;
         float sWidthHeight = width / (float) height;
         uXY = sWidthHeight;
-        //CENTER_INSIDE
-        if (width > height) {
-            if (sWH > sWidthHeight) {
-                Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight * sWH, sWidthHeight * sWH, -1, 1, 3, 5);
-            } else {
-                Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight / sWH, sWidthHeight / sWH, -1, 1, 3, 5);
-            }
-        } else {
-            if (sWH > sWidthHeight) {
-                Matrix.orthoM(mProjectMatrix, 0, -1, 1, -1 / sWidthHeight * sWH, 1 / sWidthHeight * sWH, 3, 5);
-            } else {
-                Matrix.orthoM(mProjectMatrix, 0, -1, 1, -sWH / sWidthHeight, sWH / sWidthHeight, 3, 5);
-            }
-        }
-        //fitXY
-        Matrix.orthoM(mProjectMatrix, 0, -1, 1, -1, 1, 3, 5);
+        switch (mCurrentScaleType) {
+            case SCALE_TYPE_FIT_XY:
+                Matrix.orthoM(mProjectMatrix, 0, -1, 1, -1, 1, 3, 5);
+                break;
+            case SCALE_TYPE_CENTER_CROP:
+                if (width > height) {
+                    if (sWH > sWidthHeight) {
+                        Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight / sWH, sWidthHeight / sWH, -1, 1, 3, 5);
+                    } else {
+                        Matrix.orthoM(mProjectMatrix, 0, -1, 1, -sWH / sWidthHeight, sWH / sWidthHeight, 3, 5);
+                    }
+                } else {
+                    if (sWH > sWidthHeight) {
+                        Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight / sWH, sWidthHeight / sWH, -1, 1, 3, 5);
+                    } else {
+                        Matrix.orthoM(mProjectMatrix, 0, -1, 1, -sWH / sWidthHeight, sWH / sWidthHeight, 3, 5);
+                    }
+                }
+                break;
+            case SCALE_TYPE_CENTER_INSIDE:
+                if (width > height) {
+                    if (sWH > sWidthHeight) {
+                        Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight * sWH, sWidthHeight * sWH, -1, 1, 3, 5);
+                    } else {
+                        Matrix.orthoM(mProjectMatrix, 0, -sWidthHeight / sWH, sWidthHeight / sWH, -1, 1, 3, 5);
+                    }
+                } else {
+                    if (sWH > sWidthHeight) {
+                        Matrix.orthoM(mProjectMatrix, 0, -1, 1, -1 / sWidthHeight * sWH, 1 / sWidthHeight * sWH, 3, 5);
+                    } else {
+                        Matrix.orthoM(mProjectMatrix, 0, -1, 1, -sWH / sWidthHeight, sWH / sWidthHeight, 3, 5);
+                    }
+                }
+                break;
 
+        }
         //设置相机位置
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 5.0f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         //计算变换矩阵
@@ -141,17 +167,17 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         onDrawSet();
 
 
-        GLES20.glUniformMatrix4fv(mGlHMatrix,1,false,mMVPMatrix,0);
-        GLES20.glUniform1i(mGlHTexture,0);
+        GLES20.glUniformMatrix4fv(mGlHMatrix, 1, false, mMVPMatrix, 0);
+        GLES20.glUniform1i(mGlHTexture, 0);
         //创建texture
         createTexture();
         // 为画笔指定顶点位置数据(mGlHPosition)
-        GLES20.glVertexAttribPointer(mGlHPosition,2,GLES20.GL_FLOAT,false,0,mVerticesfloatBuffer);
+        GLES20.glVertexAttribPointer(mGlHPosition, 2, GLES20.GL_FLOAT, false, 0, mVerticesfloatBuffer);
         GLES20.glEnableVertexAttribArray(mGlHPosition);
         // 为画笔指定顶点位置数据(mGlHCoordinate)
-        GLES20.glVertexAttribPointer(mGlHCoordinate,2,GLES20.GL_FLOAT,false,0,mFragfloatBuffer);
+        GLES20.glVertexAttribPointer(mGlHCoordinate, 2, GLES20.GL_FLOAT, false, 0, mFragfloatBuffer);
         GLES20.glEnableVertexAttribArray(mGlHCoordinate);
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP,0,4);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
     }
 
     private int createTexture() {

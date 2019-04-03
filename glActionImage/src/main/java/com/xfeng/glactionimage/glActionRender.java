@@ -30,6 +30,10 @@ public class glActionRender implements GLSurfaceView.Renderer{
         mActionImageFilter.setBitmap(bitmap);
     }
 
+    public void setScaleType(int scaleType) {
+        mActionImageFilter.setScaleType(scaleType);
+    }
+
 
     /**
      * 当GLSurfaceView中的Surface被创建的时候(界面显示)回调此方法，一般在这里做一些初始化

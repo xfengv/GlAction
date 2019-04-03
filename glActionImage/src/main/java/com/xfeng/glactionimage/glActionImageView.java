@@ -29,6 +29,7 @@ public class glActionImageView extends GLSurfaceView {
     private void init() {
         // 设置OpenGL版本(一定要设置)
         setEGLContextClientVersion(2);
+        //背景透明
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
         setZOrderOnTop(true);
@@ -37,6 +38,7 @@ public class glActionImageView extends GLSurfaceView {
         setRenderer(mGlActionRender);
         // 设置渲染模式为连续模式,手动调用刷新
         setRenderMode(RENDERMODE_WHEN_DIRTY);
+        mGlActionRender.setScaleType(ActionImageFilter.SCALE_TYPE_FIT_XY);
         try {
             mGlActionRender.setImage(BitmapFactory.decodeStream(getResources().getAssets().open("texture/fengj.png")));
             requestLayout();

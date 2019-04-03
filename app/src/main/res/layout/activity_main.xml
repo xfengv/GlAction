@@ -11,7 +11,7 @@
     <com.xfeng.glactionimage.glActionImageView
         android:id="@+id/buttom"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="450dp"
         android:layout_centerInParent="true"
         />
 
