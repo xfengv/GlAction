@@ -48,13 +48,15 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
     private int mProgram;
     private int mGlHPosition;
     private int mGlHCoordinate;
-    private int mGlHTexture;
+    private int mGlHTexture0;
+    private int mGlHTexture1;
     private int mGlHMatrix;
     private int mGlHUxy;
     private float uXY;
     public static final int SCALE_TYPE_FIT_XY = 1001;
     public static final int SCALE_TYPE_CENTER_CROP = 1002;
     public static final int SCALE_TYPE_CENTER_INSIDE = 1003;
+    public static boolean isBlur = false;
     private static int mCurrentScaleType = SCALE_TYPE_CENTER_CROP;
 
 
@@ -99,9 +101,9 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         // 获取着色器中的属性引用id(传入的字符串就是我们着色器脚本中的属性名)
         mGlHPosition = GLES20.glGetAttribLocation(mProgram, "vPosition");
         mGlHCoordinate = GLES20.glGetAttribLocation(mProgram, "vCoordinate");
-        mGlHTexture = GLES20.glGetUniformLocation(mProgram, "vTexture");
+        mGlHTexture0 = GLES20.glGetUniformLocation(mProgram, "vTexture0");
+        mGlHTexture1 = GLES20.glGetUniformLocation(mProgram, "vTexture1");
         mGlHMatrix = GLES20.glGetUniformLocation(mProgram, "vMatrix");
-
 
 
         //其他的一些Uniform数据
@@ -171,9 +173,15 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
 
 
         GLES20.glUniformMatrix4fv(mGlHMatrix, 1, false, mMVPMatrix, 0);
-        GLES20.glUniform1i(mGlHTexture, 0);
+        GLES20.glUniform1i(mGlHTexture0, 0);
         //创建texture
-        createTexture();
+        if (isBlur) {
+            GLES20.glUniform1i(mGlHTexture1, 1);
+            createTexture(2);
+        } else {
+            createTexture(1);
+        }
+
         // 为画笔指定顶点位置数据(mGlHPosition)
         GLES20.glVertexAttribPointer(mGlHPosition, 2, GLES20.GL_FLOAT, false, 0, mVerticesfloatBuffer);
         GLES20.glEnableVertexAttribArray(mGlHPosition);
@@ -183,26 +191,26 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
     }
 
-    private int createTexture() {
-        int[] texture = new int[1];
+    private void createTexture(int num) {
+        int[] texture = new int[num];
         if (mBitmap != null && !mBitmap.isRecycled()) {
             //生成纹理
-            GLES20.glGenTextures(1, texture, 0);
+            GLES20.glGenTextures(num, texture, 0);
             //生成纹理
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture[0]);
-            //设置缩小过滤为使用纹理中坐标最接近的一个像素的颜色作为需要绘制的像素颜色
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-            //设置放大过滤为使用纹理中坐标最接近的若干个颜色，通过加权平均算法得到需要绘制的像素颜色
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-            //设置环绕方向S，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-            //设置环绕方向T，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
-            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-            //根据以上指定的参数，生成一个2D纹理
-            GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mBitmap, 0);
-            return texture[0];
+            for (int i = 0; i < num; i++) {
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture[i]);
+                //设置缩小过滤为使用纹理中坐标最接近的一个像素的颜色作为需要绘制的像素颜色
+                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+                //设置放大过滤为使用纹理中坐标最接近的若干个颜色，通过加权平均算法得到需要绘制的像素颜色
+                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+                //设置环绕方向S，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
+                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+                //设置环绕方向T，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
+                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+                //根据以上指定的参数，生成一个2D纹理
+                GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mBitmap, 0);
+            }
         }
-        return 0;
     }
 
     //更多的uniform信息
