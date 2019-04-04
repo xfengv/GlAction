@@ -38,9 +38,9 @@ public class glActionImageView extends GLSurfaceView {
         setRenderer(mGlActionRender);
         // 设置渲染模式为连续模式,手动调用刷新
         setRenderMode(RENDERMODE_WHEN_DIRTY);
-        mGlActionRender.setScaleType(ActionImageFilter.SCALE_TYPE_FIT_XY);
+        mGlActionRender.setScaleType(ActionImageFilter.SCALE_TYPE_CENTER_CROP);
         try {
-            mGlActionRender.setImage(BitmapFactory.decodeStream(getResources().getAssets().open("texture/fengj.png")));
+            mGlActionRender.setImage(BitmapFactory.decodeStream(getResources().getAssets().open("texture/timg.jpg")));
             requestLayout();
         } catch (IOException e) {
             e.printStackTrace();

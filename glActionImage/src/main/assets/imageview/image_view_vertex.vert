@@ -5,13 +5,13 @@ uniform int vertexType;
 
 
 
-// 高斯算子大小(3 x 3)
-const int GAUSSIAN_SAMPLES = 9;
+// 高斯算子左右偏移值，当偏移值为2时，高斯算子为5 x 5
+const int SHIFT_SIZE = 2;
 
 uniform float texelWidthOffset;
 uniform float texelHeightOffset;
-varying vec2 blurCoordinates0[GAUSSIAN_SAMPLES];
-varying vec2 blurCoordinates1[GAUSSIAN_SAMPLES];
+varying vec4 blurShiftCoordinates0[SHIFT_SIZE];
+varying vec4 blurShiftCoordinates1[SHIFT_SIZE];
 
 
 varying vec2 aCoordinate;
@@ -21,28 +21,28 @@ varying vec4 gPosition;
 void main(){
     gl_Position=vMatrix*vPosition;
     aPos=vPosition;
-    aCoordinate=vCoordinate;
+    aCoordinate=vCoordinate.xy;
     gPosition=vMatrix*vPosition;
 
 
 
 
     if(vertexType==3){
-        int multiplier0 = 0;
-        vec2 blurStep0;
-        vec2 singleStepOffset0 = vec2(texelHeightOffset, texelWidthOffset);
-        for (int i = 0; i < GAUSSIAN_SAMPLES; i++) {
-            multiplier0 = (i - ((GAUSSIAN_SAMPLES - 1) / 2));
-            blurStep0 = float(multiplier0) * singleStepOffset0;
-            blurCoordinates0[i] = vCoordinate.xy + blurStep0;
+        // 偏移步距
+        vec2 singleStepOffset0 = vec2(texelWidthOffset, texelHeightOffset);
+        // 记录偏移坐标
+        for (int i = 0; i < SHIFT_SIZE; i++) {
+            blurShiftCoordinates0[i] = vec4(aCoordinate.xy - float(i + 1) * singleStepOffset0,
+            aCoordinate.xy + float(i + 1) * singleStepOffset0);
         }
-        int multiplier1 = 0;
-        vec2 blurStep1;
-        vec2 singleStepOffset1 = vec2(texelWidthOffset, texelHeightOffset);
-        for (int i = 0; i < GAUSSIAN_SAMPLES; i++) {
-            multiplier1 = (i - ((GAUSSIAN_SAMPLES - 1) / 2));
-            blurStep1 = float(multiplier1) * singleStepOffset1;
-            blurCoordinates1[i] = vCoordinate.xy + blurStep1;
+
+
+        // 偏移步距
+        vec2 singleStepOffset1 = vec2(texelHeightOffset, texelWidthOffset);
+        // 记录偏移坐标
+        for (int i = 0; i < SHIFT_SIZE; i++) {
+            blurShiftCoordinates1[i] = vec4(aCoordinate.xy - float(i + 1) * singleStepOffset1,
+            aCoordinate.xy + float(i + 1) * singleStepOffset1);
         }
     }
 }

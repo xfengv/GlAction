@@ -28,8 +28,8 @@ public class ActionImageColorFiter extends ActionImageFilter {
         GLES20.glUniform1i(mVertexType,mFilter.getType());
         GLES20.glUniform3fv(hChangeColor,1,mFilter.data(),0);
         isBlur=true;
-        GLES20.glUniform1f(mTexelWidthOffset, 1f/100f);
-        GLES20.glUniform1f(mTexelHeightOffset, 1f/100f);
+        GLES20.glUniform1f(mTexelWidthOffset, 1f/50f);
+        GLES20.glUniform1f(mTexelHeightOffset, 0f);
     }
 
     @Override

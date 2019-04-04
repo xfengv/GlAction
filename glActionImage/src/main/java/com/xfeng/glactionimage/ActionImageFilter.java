@@ -176,10 +176,10 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         GLES20.glUniform1i(mGlHTexture0, 0);
         //创建texture
         if (isBlur) {
-            GLES20.glUniform1i(mGlHTexture1, 1);
-            createTexture(2);
+            GLES20.glUniform1i(mGlHTexture1, 0);
+            createTexture();
         } else {
-            createTexture(1);
+            createTexture();
         }
 
         // 为画笔指定顶点位置数据(mGlHPosition)
@@ -191,26 +191,26 @@ public abstract class ActionImageFilter implements GLSurfaceView.Renderer {
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
     }
 
-    private void createTexture(int num) {
-        int[] texture = new int[num];
+    private int createTexture() {
+        int[] texture = new int[1];
         if (mBitmap != null && !mBitmap.isRecycled()) {
             //生成纹理
-            GLES20.glGenTextures(num, texture, 0);
+            GLES20.glGenTextures(1, texture, 0);
             //生成纹理
-            for (int i = 0; i < num; i++) {
-                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture[i]);
-                //设置缩小过滤为使用纹理中坐标最接近的一个像素的颜色作为需要绘制的像素颜色
-                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-                //设置放大过滤为使用纹理中坐标最接近的若干个颜色，通过加权平均算法得到需要绘制的像素颜色
-                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-                //设置环绕方向S，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
-                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-                //设置环绕方向T，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
-                GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-                //根据以上指定的参数，生成一个2D纹理
-                GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mBitmap, 0);
-            }
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture[0]);
+            //设置缩小过滤为使用纹理中坐标最接近的一个像素的颜色作为需要绘制的像素颜色
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+            //设置放大过滤为使用纹理中坐标最接近的若干个颜色，通过加权平均算法得到需要绘制的像素颜色
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+            //设置环绕方向S，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+            //设置环绕方向T，截取纹理坐标到[1/2n,1-1/2n]。将导致永远不会与border融合
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+            //根据以上指定的参数，生成一个2D纹理
+            GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, mBitmap, 0);
+            return texture[0];
         }
+        return 0;
     }
 
     //更多的uniform信息
